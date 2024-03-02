@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useWeb3Modal } from "@web3modal/react";
-import { useAccount, useDisconnect } from "wagmi";
+import { useWeb3Modal } from '@web3modal/react';
+import { useAccount, useDisconnect } from 'wagmi';
 import ReactDOM from 'react-dom/client';
 import Logo from './assets/gasly.svg';
-
 
 const App = () => {
     const [data, setdata] = useState([
@@ -16,40 +15,30 @@ const App = () => {
         "7. Congratulations! You've successfully swapped on Uniswap by paying gas fees in an ERC20 token.",
     ]);
 
-
-    const [ loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const { open } = useWeb3Modal();
     const { isConnected } = useAccount();
     const { disconnect } = useDisconnect();
-    const label = isConnected ? "Disconnect Wallet" : "Connect Your Wallet";
-  
+    const label = isConnected ? 'Disconnect Wallet' : 'Connect Your Wallet';
+
     async function onOpen() {
-      setLoading(true);
-      await open();
-      setLoading(false);
+        setLoading(true);
+        await open();
+        setLoading(false);
     }
-
-
 
     function onClose() {
-        console.log("Web3ModalClosed");
-        return (
-            <div>
-            
-            </div>
-        )
+        console.log('Web3ModalClosed');
+        return <div></div>;
     }
 
-
-  
     function onClick() {
-      if (isConnected) {
-        disconnect();
-      } else {
-        onOpen();
-      }
+        if (isConnected) {
+            disconnect();
+        } else {
+            onOpen();
+        }
     }
-  
 
     return (
         <div
@@ -82,7 +71,7 @@ const App = () => {
                             fontWeight: '600',
                         }}
                     >
-                        GasPay
+                        ZeroBridge
                     </p>
                 </div>
                 <div
@@ -115,7 +104,7 @@ const App = () => {
                 <div style={{ marginBottom: '10%' }}></div>
             </div>
             <button onClick={onClick} disabled={loading}>
-                {loading ? "Loading..." : label}
+                {loading ? 'Loading...' : label}
             </button>
         </div>
     );

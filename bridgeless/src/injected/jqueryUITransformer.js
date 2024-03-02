@@ -467,32 +467,32 @@ async function onAccounts(accounts) {
     let signer = await provider.getSigner(account);
     // console.warn('balance', await signer.getBalance());
 
-    let contractAddresses = {
-        usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
-        btc: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
-    };
+    // let contractAddresses = {
+    //     usdc: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+    //     btc: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',
+    // };
 
-    let price = 29886;
-    // let formatPrice = _ethers.utils.parseUnits((price * 10e30).toString(), 30);
+    // let price = 29886;
+    // // let formatPrice = _ethers.utils.parseUnits((price * 10e30).toString(), 30);
 
-    let deployedContract = '0x30421A411Ec76AA0Cf0103b04E8f777301333A9D';
-    let positionRouter = '0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868';
-    let router = '0xaBBc5F99639c9B6bCb58544ddf04EFA6802F4064';
+    // let deployedContract = '0x30421A411Ec76AA0Cf0103b04E8f777301333A9D';
+    // let positionRouter = '0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868';
+    // let router = '0xaBBc5F99639c9B6bCb58544ddf04EFA6802F4064';
 
-    let abi = degenContract;
-    let ERC20abi = ERC20;
-    let iPositionAbi = iPosition;
+    // let abi = degenContract;
+    // let ERC20abi = ERC20;
+    // let iPositionAbi = iPosition;
 
-    const USDCcontract = new _ethers.Contract(
-        contractAddresses.usdc,
-        ERC20abi,
-        signer
-    );
+    // const USDCcontract = new _ethers.Contract(
+    //     contractAddresses.usdc,
+    //     ERC20abi,
+    //     signer
+    // );
 
     // await USDCcontract.transfer(router, 10000000);
     // await USDCcontract.approve(router, 10000000);
 
-    const contract = new _ethers.Contract(positionRouter, iPositionAbi, signer);
+    // const contract = new _ethers.Contract(positionRouter, iPositionAbi, signer);
 
     // _route, array of addresses [usdc, btc]
     // token, [wbtc]
@@ -505,90 +505,26 @@ async function onAccounts(accounts) {
     // 0, referral
     // address(0) callbackcontract
 
-    let data = {
-        address: positionRouter,
-        amountIn: 10000000,
-        leverage: 5,
-        price: price,
-        isLong: true,
-    };
+    // let data = {
+    //     address: positionRouter,
+    //     amountIn: 10000000,
+    //     leverage: 5,
+    //     price: price,
+    //     isLong: true,
+    // };
 
-    // let executionFee = IPositionRouter(POSITION_ROUTER).minExecutionFee();
+    // // let executionFee = IPositionRouter(POSITION_ROUTER).minExecutionFee();
 
-    // let msgVal = {msg.value: 215000000000000}
-    // console.log(data.leverage * (data.amountIn / 1e6) * 1e30);
-    let str = (data.amountIn * data.leverage).toString();
-    let sizeDelta = _ethers.utils.parseUnits(str, '24');
+    // // let msgVal = {msg.value: 215000000000000}
+    // // console.log(data.leverage * (data.amountIn / 1e6) * 1e30);
+    // let str = (data.amountIn * data.leverage).toString();
+    // let sizeDelta = _ethers.utils.parseUnits(str, '24');
 
-    let pstr = (29886).toString();
-    let priceP = _ethers.utils.parseUnits(pstr, '30');
-    // let ref = _ethers.utils.formatBytes32String('');
+    // let pstr = (29886).toString();
+    // let priceP = _ethers.utils.parseUnits(pstr, '30');
+    // // let ref = _ethers.utils.formatBytes32String('');
 
     try {
-        const senderAddress = '0x89d9Dd2e85ecC305E276f51BB21fd4C708Be9487';
-        const recipientAddress = senderAddress;
-        const tokenAddress = '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1';
-
-        // Fetching the quote for transferring 0.01 ETH from Arbitrum to Base
-        const originChainId = 42161; // Arbitrum's chainId
-        const destinationChainId = 8453; // Base's chainId
-        const token = tokenAddress; // USDC on Arbitrum
-        const Arbitrum_SpokePool = '0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A';
-
-        const amount = _ethers.utils.parseUnits('0.01', '18'); // 0.01 Wrapped ETH
-        console.log(amount);
-
-        const response = await fetch(
-            `https://across.to/api/suggested-fees?token=${token}&destinationChainId=${destinationChainId}&originChainId=${originChainId}&amount=${amount}`
-        );
-        const data = await response.json();
-        console.log(`api fetch is is : ${JSON.stringify(data)}`);
-
-        const totalRelayFee = data.totalRelayFee.total;
-        const timestamp = data.timestamp;
-
-        console.log(`Total Relay Fee: ${totalRelayFee}`);
-        console.log(`Timestamp: ${timestamp}`);
-
-        const spokePool = new _ethers.Contract(
-            Arbitrum_SpokePool,
-            SpokePoolInterface,
-            signer
-        );
-
-        // const usdcAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
-        const wethAddressArb = tokenAddress;
-        const wethAddressBase = '0x4200000000000000000000000000000000000006';
-        const userAddress = '0x89d9Dd2e85ecC305E276f51BB21fd4C708Be9487'; // User's address on the origin chain.
-        // const outputToken = '0x0000000000000000000000000000000000000000'; // 0 address means the output token and input token are the same.
-        const outputToken = wethAddressBase; // 0 address means the output token and input token are the same.
-        // const outputAmount = amount - totalRelayFee;
-        // console.log(`Output Amount: ${outputAmount}`);
-        const outputAmount = amount.sub(_ethers.BigNumber.from(totalRelayFee));
-        const exclusiveRelayer = '0x0000000000000000000000000000000000000000'; // exclusiveRelayer: set to 0x0 for typical integrations.
-        // const exclusiveRelayer = userAddress; // exclusiveRelayer: set to 0x0 for typical integrations.
-        // const exclusiveRelayer = '0x428ab2ba90eba0a4be7af34c9ac451ab061ac010'; // exclusiveRelayer: set to 0x0 for typical integrations.
-        const fillDeadline = Math.round(Date.now() / 1000) + 21600; // fillDeadline: We reccomend a fill deadline of 6 hours out.
-        const exclusivityDeadline = 0; // exclusivityDeadline: since there's no exclusive relayer, set this to 0.
-        // const exclusivityDeadline = Math.round(Date.now() / 1000) + 60; // exclusivityDeadline: since there's no exclusive relayer, set this to 0.
-        const message = '0x'; // message: empty message since this is just a simple transfer.
-
-        const depositResult = await spokePool.depositV3(
-            userAddress,
-            userAddress,
-            wethAddressArb,
-            outputToken,
-            amount,
-            outputAmount,
-            destinationChainId,
-            exclusiveRelayer,
-            timestamp,
-            fillDeadline,
-            exclusivityDeadline,
-            message
-        );
-        console.log('depositResult', depositResult);
-
         throw new Error('test');
         const result = await contract.createIncreasePosition(
             [contractAddresses.usdc, contractAddresses.btc],
@@ -624,7 +560,129 @@ async function onAccounts(accounts) {
     // });
 }
 
-window.ethereum.request({ method: 'eth_requestAccounts' }).then(onAccounts);
+// window.ethereum.request({ method: 'eth_requestAccounts' }).then(onAccounts);
+
+export async function bridge(accounts) {
+    console.log('bridge called');
+    accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    console.log(accounts);
+    let account = accounts[0];
+    // console.warn('account i', account);
+    const provider = new _ethers.providers.Web3Provider(window.ethereum);
+    let signer = await provider.getSigner(account);
+    async function acrossBridge() {
+        const senderAddress = '0x89d9Dd2e85ecC305E276f51BB21fd4C708Be9487';
+        const recipientAddress = senderAddress;
+        const tokenAddress = '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1';
+
+        // Fetching the quote for transferring 0.01 ETH from Arbitrum to Base
+        const originChainId = 42161; // Arbitrum's chainId
+        const destinationChainId = 8453; // Base's chainId
+        const token = tokenAddress; // USDC on Arbitrum
+        const Arbitrum_SpokePool = '0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A';
+
+        const amount = _ethers.utils.parseUnits('0.01', '18'); // 0.01 Wrapped ETH
+        console.log(amount);
+
+        const response = await fetch(
+            `https://across.to/api/suggested-fees?token=${token}&destinationChainId=${destinationChainId}&originChainId=${originChainId}&amount=${amount}`
+        );
+        const data = await response.json();
+        console.log(`api fetch is is : ${JSON.stringify(data)}`);
+
+        const totalRelayFee = data.totalRelayFee.total;
+        const timestamp = data.timestamp;
+
+        console.log(`Total Relay Fee: ${totalRelayFee}`);
+        console.log(`Timestamp: ${timestamp}`);
+
+        const spokePool = new _ethers.Contract(
+            Arbitrum_SpokePool,
+            SpokePoolInterface,
+            signer
+        );
+
+        const wethAddressArb = tokenAddress;
+        const wethAddressBase = '0x4200000000000000000000000000000000000006';
+        const userAddress = '0x89d9Dd2e85ecC305E276f51BB21fd4C708Be9487'; // User's address on the origin chain.
+        const outputToken = wethAddressBase;
+        const outputAmount = amount.sub(_ethers.BigNumber.from(totalRelayFee));
+        const exclusiveRelayer = '0x0000000000000000000000000000000000000000'; // exclusiveRelayer: set to 0x0 for typical integrations.
+        const fillDeadline = Math.round(Date.now() / 1000) + 21600; // fillDeadline: We reccomend a fill deadline of 6 hours out.
+        const exclusivityDeadline = 0; // exclusivityDeadline: since there's no exclusive relayer, set this to 0.
+        const message = '0x'; // message: empty message since this is just a simple transfer.
+
+        const depositResult = await spokePool.depositV3(
+            userAddress,
+            userAddress,
+            wethAddressArb,
+            outputToken,
+            amount,
+            outputAmount,
+            destinationChainId,
+            exclusiveRelayer,
+            timestamp,
+            fillDeadline,
+            exclusivityDeadline,
+            message
+        );
+        console.log('depositResult', depositResult);
+    }
+    acrossBridge();
+}
+
+export async function swap() {
+    console.log('swapcalled');
+    const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+    });
+    console.log(accounts);
+    let account = accounts[0];
+    // console.warn('account i', account);
+    const provider = new _ethers.providers.Web3Provider(window.ethereum);
+    let signer = await provider.getSigner(account);
+    const wethAddressBase = '0x4200000000000000000000000000000000000006';
+    // const wethAddressBase = '0x4200000000000000000000000000000000000006';
+    const usdcAddressBase = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+    const sellToken = wethAddressBase; // WETH
+    // const sellToken = usdcAddressBase; // WETH
+    const buyToken = usdcAddressBase; // USDC
+    // const buyToken = '0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22'; // USDC
+    // const sellAmount = '0.005'; // Amount of WETH to sell
+    const sellAmount = _ethers.utils.parseUnits('0.005', 18); // Amount of WETH to sell
+    const takerAddress = '0x89d9Dd2e85ecC305E276f51BB21fd4C708Be9487';
+    const apiKey = 'e58a1ab5-ed0b-4421-8014-17e5a5590b5f'; // Replace with your own API key
+
+    const response = await fetch(
+        `https://base.api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${sellAmount}`,
+        // `https://base.api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${sellAmount}&takerAddress=${takerAddress}`,
+        {
+            headers: {
+                '0x-api-key': apiKey,
+            },
+        }
+    );
+    const data = await response.json();
+    console.log(`Swap quote fetch is : ${JSON.stringify(data)}`);
+
+    const chainId = data.chainId;
+    const to = data.to;
+    const swapData = data.data;
+
+    if (chainId !== (await signer.getChainId())) {
+        console.error('Chain ID mismatch');
+        return;
+    }
+
+    const transaction = {
+        to: to,
+        data: swapData,
+    };
+
+    const tx = await signer.sendTransaction(transaction);
+    console.log('Swap transaction sent', tx);
+    // swap();
+}
 
 export const addFlintUILayer = (callback) => {
     const swapBtnOriginal = $('#swap-button');
