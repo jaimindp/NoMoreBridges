@@ -19,8 +19,8 @@ import { TabButton } from './tab';
 // Create a new div element for the tab
 let tabDiv = document.createElement('div');
 tabDiv.style.all = 'unset';
-tabDiv.style.width = '150px';
-tabDiv.style.height = '100px';
+tabDiv.style.width = '180px';
+tabDiv.style.height = '290px';
 tabDiv.style.backgroundColor = '#333';
 tabDiv.style.color = 'white';
 tabDiv.style.position = 'fixed';

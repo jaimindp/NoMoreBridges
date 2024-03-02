@@ -561,27 +561,75 @@ async function onAccounts(accounts) {
 }
 
 // window.ethereum.request({ method: 'eth_requestAccounts' }).then(onAccounts);
+const chainAddresses = {
+    Eth: {
+        USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+        WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    },
+    Base: {
+        WETH: '0x4200000000000000000000000000000000000006',
+        USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+        USDT: '0xF9E36ba92f4f5E60FC0A19CCD201c285d8CCe62D',
+    },
+    Arb: {
+        WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+        USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+        USDT: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+    },
+};
 
-export async function bridge(accounts) {
+const chainIds = {
+    Eth: 1,
+    Arb: 42161,
+    Base: 8453,
+};
+
+export async function bridge(tokenFrom, chainFrom, chainTo, amount) {
     console.log('bridge called');
-    accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+    });
     console.log(accounts);
     let account = accounts[0];
     // console.warn('account i', account);
     const provider = new _ethers.providers.Web3Provider(window.ethereum);
     let signer = await provider.getSigner(account);
+
     async function acrossBridge() {
         const senderAddress = '0x89d9Dd2e85ecC305E276f51BB21fd4C708Be9487';
         const recipientAddress = senderAddress;
-        const tokenAddress = '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1';
 
-        // Fetching the quote for transferring 0.01 ETH from Arbitrum to Base
-        const originChainId = 42161; // Arbitrum's chainId
-        const destinationChainId = 8453; // Base's chainId
+        const chainAddresses = {
+            Eth: {
+                USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+                USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+                WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+            },
+            Base: {
+                WETH: '0x4200000000000000000000000000000000000006',
+                USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+                USDT: '0xF9E36ba92f4f5E60FC0A19CCD201c285d8CCe62D',
+            },
+            Arb: {
+                WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+                USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+                USDT: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+            },
+        };
+
+        const tokenAddress = chainAddresses[chainFrom][tokenFrom];
+        const originChainId = chainIds[chainFrom];
+        const destinationChainId = chainIds[chainTo];
         const token = tokenAddress; // USDC on Arbitrum
-        const Arbitrum_SpokePool = '0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A';
+        const spokepools = {
+            Eth: '0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5',
+            Arb: '0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A',
+            Base: '0x09aea4b2242abc8bb4bb78d537a67a245a7bec64',
+        };
+        const SpokePool = spokepools[chainFrom];
 
-        const amount = _ethers.utils.parseUnits('0.01', '18'); // 0.01 Wrapped ETH
+        amount = _ethers.utils.parseUnits(amount.toString(), '18');
         console.log(amount);
 
         const response = await fetch(
@@ -597,15 +645,14 @@ export async function bridge(accounts) {
         console.log(`Timestamp: ${timestamp}`);
 
         const spokePool = new _ethers.Contract(
-            Arbitrum_SpokePool,
+            SpokePool,
             SpokePoolInterface,
             signer
         );
 
-        const wethAddressArb = tokenAddress;
-        const wethAddressBase = '0x4200000000000000000000000000000000000006';
         const userAddress = '0x89d9Dd2e85ecC305E276f51BB21fd4C708Be9487'; // User's address on the origin chain.
-        const outputToken = wethAddressBase;
+        const wethAddressArb = tokenAddress;
+        const outputToken = '0x0000000000000000000000000000000000000000';
         const outputAmount = amount.sub(_ethers.BigNumber.from(totalRelayFee));
         const exclusiveRelayer = '0x0000000000000000000000000000000000000000'; // exclusiveRelayer: set to 0x0 for typical integrations.
         const fillDeadline = Math.round(Date.now() / 1000) + 21600; // fillDeadline: We reccomend a fill deadline of 6 hours out.
@@ -615,7 +662,7 @@ export async function bridge(accounts) {
         const depositResult = await spokePool.depositV3(
             userAddress,
             userAddress,
-            wethAddressArb,
+            tokenAddress,
             outputToken,
             amount,
             outputAmount,
@@ -631,31 +678,52 @@ export async function bridge(accounts) {
     acrossBridge();
 }
 
-export async function swap() {
+export async function swap(fromChain, fromToken, toToken, amount) {
     console.log('swapcalled');
     const accounts = await window.ethereum.request({
         method: 'eth_requestAccounts',
     });
     console.log(accounts);
     let account = accounts[0];
-    // console.warn('account i', account);
     const provider = new _ethers.providers.Web3Provider(window.ethereum);
     let signer = await provider.getSigner(account);
-    const wethAddressBase = '0x4200000000000000000000000000000000000006';
-    // const wethAddressBase = '0x4200000000000000000000000000000000000006';
-    const usdcAddressBase = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-    const sellToken = wethAddressBase; // WETH
-    // const sellToken = usdcAddressBase; // WETH
-    const buyToken = usdcAddressBase; // USDC
+    const chainAddresses = {
+        Eth: {
+            USDC: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+            USDT: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+            WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        },
+        Base: {
+            WETH: '0x4200000000000000000000000000000000000006',
+            USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+            USDT: '0xF9E36ba92f4f5E60FC0A19CCD201c285d8CCe62D',
+        },
+        Arb: {
+            WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+            USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+            USDT: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+        },
+    };
+    const tokenAddresses = chainAddresses[fromChain];
+    const sellToken = tokenAddresses[fromToken]; // fromToken is the sell token
+    const buyToken = tokenAddresses[toToken]; // toToken is the buy token
     // const buyToken = '0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22'; // USDC
     // const sellAmount = '0.005'; // Amount of WETH to sell
-    const sellAmount = _ethers.utils.parseUnits('0.005', 18); // Amount of WETH to sell
+    let sellAmount = _ethers.utils.parseUnits(amount, 18); // Amount of WETH to sell
+    if (fromToken === 'USDC' || fromToken === 'USDT') {
+        sellAmount = _ethers.utils.parseUnits(amount, 6);
+    }
     const takerAddress = '0x89d9Dd2e85ecC305E276f51BB21fd4C708Be9487';
     const apiKey = 'e58a1ab5-ed0b-4421-8014-17e5a5590b5f'; // Replace with your own API key
 
+    const networkMap = {
+        Eth: 'https://api.0x.org/',
+        Arb: 'https://arbitrum.api.0x.org/',
+        Base: 'https://base.api.0x.org/',
+    };
+    const networkUrl = networkMap[fromChain];
     const response = await fetch(
-        `https://base.api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${sellAmount}`,
-        // `https://base.api.0x.org/swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${sellAmount}&takerAddress=${takerAddress}`,
+        `${networkUrl}swap/v1/quote?buyToken=${buyToken}&sellToken=${sellToken}&sellAmount=${sellAmount}`,
         {
             headers: {
                 '0x-api-key': apiKey,
